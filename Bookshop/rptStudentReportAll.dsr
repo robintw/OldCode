@@ -1,0 +1,57 @@
+VERSION 5.00
+Begin {9EB8768B-CDFA-44DF-8F3E-857A8405E1DB} rptStudentReportAll 
+   Caption         =   "Sales by student"
+   ClientHeight    =   13995
+   ClientLeft      =   60
+   ClientTop       =   345
+   ClientWidth     =   19080
+   StartUpPosition =   2  'CenterScreen
+   WindowState     =   2  'Maximized
+   _ExtentX        =   33655
+   _ExtentY        =   24686
+   SectionData     =   "rptStudentReportAll.dsx":0000
+End
+Attribute VB_Name = "rptStudentReportAll"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+Private Sub ActiveReport_DataInitialize()
+Fields.Add "FirstName"
+Fields.Add "LastName"
+'Combination of First and Last Names
+Fields.Add "Name"
+Fields.Add "Alphacode"
+Fields.Add "ISBN"
+Fields.Add "Title"
+Fields.Add "Author"
+Fields.Add "Publisher"
+Fields.Add "Price"
+End Sub
+
+Private Sub ActiveReport_FetchData(EOF As Boolean)
+If rsReport.EOF = True Then
+rsReport.Close
+Exit Sub
+End If
+
+EOF = False
+
+Fields("FirstName").Value = rsReport!FirstName
+Fields("LastName").Value = rsReport!LastName
+Fields("Alphacode").Value = rsReport.Fields("tblStudent.Alphacode").Value
+Fields("ISBN").Value = rsReport.Fields("tblBookCopy.ISBN").Value
+Fields("Title").Value = rsReport!Title
+Fields("Author").Value = rsReport!Author
+Fields("Publisher").Value = rsReport!Publisher
+Fields("Price").Value = rsReport!SellingPrice
+Fields("Name").Value = Fields("FirstName").Value & " " & Fields("LastName").Value
+
+rsReport.MoveNext
+
+End Sub
+
+Private Sub ActiveReport_ReportEnd()
+Pages.Remove Pages.Count - 1
+Pages.Commit
+End Sub

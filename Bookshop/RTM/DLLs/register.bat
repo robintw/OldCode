@@ -1,0 +1,15 @@
+regsvr32.exe /s actrpt2.dll
+regsvr32.exe /s COMDLG32.OCX
+regsvr32.exe /s msado27.tlb
+regsvr32.exe /s msadodc.ocx
+regsvr32.exe /s MSBIND.DLL
+regsvr32.exe /s MSCOMCT2.OCX
+regsvr32.exe /s MSCOMCTL.OCX
+regsvr32.exe /s MSCOMM32.OCX
+regsvr32.exe /s msdatsrc.tlb
+regsvr32.exe /s MSFLXGRD.OCX
+regsvr32.exe /s msstdfmt.dll
+regsvr32.exe /s mswinsck.ocx
+regsvr32.exe /s msxml3.dll
+regsvr32.exe /s stdole2.tlb
+regsvr32.exe /s tabctl32.ocx

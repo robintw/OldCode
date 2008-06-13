@@ -1,0 +1,10 @@
+CREATE TABLE tblBook (
+  ISBN VARCHAR(10) NOT NULL,
+  Title VARCHAR(255) NOT NULL,
+  Author VARCHAR(255) NOT NULL,
+  Publisher VARCHAR(255) NOT NULL,
+  PRIMARY KEY(ISBN),
+  PRIMARY KEY(ISBN),
+  INDEX Author(Author),
+  INDEX Title(Title)
+);
