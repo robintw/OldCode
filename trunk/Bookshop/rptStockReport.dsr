@@ -1,0 +1,46 @@
+VERSION 5.00
+Begin {9EB8768B-CDFA-44DF-8F3E-857A8405E1DB} rptStockReport 
+   Caption         =   "Sales by student"
+   ClientHeight    =   13995
+   ClientLeft      =   60
+   ClientTop       =   345
+   ClientWidth     =   19080
+   StartUpPosition =   2  'CenterScreen
+   WindowState     =   2  'Maximized
+   _ExtentX        =   33655
+   _ExtentY        =   24686
+   SectionData     =   "rptStockReport.dsx":0000
+End
+Attribute VB_Name = "rptStockReport"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = False
+Attribute VB_PredeclaredId = True
+Attribute VB_Exposed = False
+Private Sub ActiveReport_DataInitialize()
+Fields.Add "ISBN"
+Fields.Add "CopyID"
+Fields.Add "Title"
+Fields.Add "Author"
+Fields.Add "Publisher"
+Fields.Add "Price"
+End Sub
+
+Private Sub ActiveReport_FetchData(EOF As Boolean)
+If rsReport.EOF = True Then
+rsReport.Close
+Exit Sub
+End If
+
+EOF = False
+
+Fields("ISBN").Value = rsReport.Fields("tblBookCopy.ISBN").Value
+Fields("CopyID").Value = rsReport!CopyID
+Fields("Title").Value = rsReport!Title
+Fields("Author").Value = rsReport!Author
+Fields("Publisher").Value = rsReport!Publisher
+Fields("Price").Value = rsReport!SellingPrice
+
+rsReport.MoveNext
+
+End Sub
+
