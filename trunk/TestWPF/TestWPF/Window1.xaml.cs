@@ -12,6 +12,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.Diagnostics;
 using System.IO;
+using System.ComponentModel;
 
 namespace TestWPF
 {
@@ -34,18 +35,22 @@ namespace TestWPF
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             SearchResults = new Results();
-            listBox1.ItemsSource = SearchResults;
+
             comboBox1.ItemsSource = SearchResults;
             comboBox1.Focus();
 
-            string[] files = Directory.GetFiles(@"C:\Users\Robin Wilson\AppData\Roaming\Microsoft\Windows\Start Menu", "*.lnk", SearchOption.AllDirectories);
-            foreach (string filename in files)
+            string[] directories = { @"C:\Users\All Users\Microsoft\Windows\Start Menu", @"C:\Users\Robin Wilson\AppData\Roaming\Microsoft\Windows\Start Menu" };
+
+            foreach (string dir in directories)
             {
-                FileInfo fi = new FileInfo(filename);
+                string[] files = Directory.GetFiles(dir, "*.lnk", SearchOption.AllDirectories);
+                foreach (string filename in files)
+                {
+                    FileInfo fi = new FileInfo(filename);
 
-                SearchResults.Add(new Result(fi.Name, fi.FullName));
+                    SearchResults.Add(new Result(fi.Name, fi.FullName));
+                }
             }
-
             
         }
 
@@ -63,6 +68,15 @@ namespace TestWPF
         private void comboBox1_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             comboBox1.IsDropDownOpen = true;
+
+            ICollectionView collView = CollectionViewSource.GetDefaultView(comboBox1.ItemsSource);
+            collView.Filter = new Predicate<object>(FilterCombo);
+        }
+
+        public bool FilterCombo(object item)
+        {
+            Result result = item as Result;
+            return (result.Name.ToLower().Contains(comboBox1.Text.ToLower()));
         }
 
         private void comboBox1_DropDownClosed(object sender, EventArgs e)
@@ -72,6 +86,13 @@ namespace TestWPF
                 Result SelRes = (Result)comboBox1.SelectedItem;
                 //MessageBox.Show(SelRes.Name);
                 SelRes.Run();
+
+                comboBox1.Text = "";
+                comboBox1.SelectedIndex = -1;
+            }
+            else
+            {
+                MessageBox.Show("Null!!");
             }
         }
     }

@@ -2,8 +2,9 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:custom="clr-namespace:TestWPF"
+    xmlns:TestWPF="clr-namespace:TestWPF"
     x:Class="TestWPF.Window1"
-    Title="Window1" Height="300" Width="843" Loaded="Window_Loaded" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
+    Title="Window1" Height="120" Width="843" Loaded="Window_Loaded" xmlns:Microsoft_Windows_Themes="clr-namespace:Microsoft.Windows.Themes;assembly=PresentationFramework.Aero">
     <Window.Resources>
         <Style TargetType="{x:Type Button}">
             <Setter Property="Background" Value="Silver"/>
@@ -19,6 +20,7 @@
             </Style.Triggers>
         </Style>
         
+        <ObjectDataProvider x:Key="Result" ObjectType="{x:Type TestWPF:Result}" />
         
         <DataTemplate x:Key="ShowResult" DataType="TestWPF.Result">
             <StackPanel Margin="5" Orientation="Horizontal">
@@ -222,14 +224,7 @@
     		</Style.Triggers>
     	</Style>
     </Window.Resources>
-    <Grid Width="786">
-        <Button Height="23" HorizontalAlignment="Right" Margin="0,24,166,0" x:Name="btnTest" VerticalAlignment="Top" Width="75" Click="btnTest_Click" Content="Add"/>
-        <ListBox ItemTemplate="{StaticResource ShowResult}" Margin="25,13,0,9" x:Name="listBox1" HorizontalAlignment="Left" Width="331"  />
-        <ComboBox StaysOpenOnEdit="True"  DropDownClosed="comboBox1_DropDownClosed" PreviewTextInput="comboBox1_PreviewTextInput" SelectionChanged="comboBox1_SelectionChanged" ItemTemplate="{StaticResource ShowResult}"  Margin="220,111,61,101" x:Name="comboBox1" IsEditable="True" Style="{DynamicResource RobinComboStyle}" />
-        <ContentControl Height="50" Margin="268,0,22,21" x:Name="contentControl1" VerticalAlignment="Bottom" Content="{Binding Path=SelectedValue, ElementName=comboBox1}" ContentTemplate="{StaticResource ShowResult}"/>
-        <ComboBox Height="23" HorizontalAlignment="Right" Margin="0,61,166,0" Name="comboBox2" VerticalAlignment="Top" Width="215">
-            <ComboBoxItem>Test 1</ComboBoxItem>
-            <ComboBoxItem>test 2</ComboBoxItem>
-        </ComboBox>
+    <Grid Width="786" Height="73">
+        <ComboBox DropDownClosed="comboBox1_DropDownClosed" IsDropDownOpen="False" IsEditable="True" IsTextSearchEnabled="False" ItemTemplate="{StaticResource ShowResult}" Margin="11,10,9,0" Name="comboBox1" PreviewTextInput="comboBox1_PreviewTextInput" SelectionChanged="comboBox1_SelectionChanged" StaysOpenOnEdit="True" Style="{DynamicResource RobinComboStyle}" Height="50" VerticalAlignment="Top" />
     </Grid>
 </Window>

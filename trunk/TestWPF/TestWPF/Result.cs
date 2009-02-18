@@ -36,6 +36,9 @@ namespace TestWPF
             set;
         }
 
+        /// <summary>
+        /// Allows the icon for the result to be set.
+        /// </summary>
         public System.Drawing.Icon Icon
         {
             set
@@ -44,6 +47,9 @@ namespace TestWPF
             }
         }
 
+        /// <summary>
+        /// Returns an ImageSource of the icon suitable for use in WPF
+        /// </summary>
         public System.Windows.Media.ImageSource Image
         {
             get
