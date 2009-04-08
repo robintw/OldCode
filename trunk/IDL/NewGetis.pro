@@ -11,10 +11,13 @@ PRO NEWGETIS, event
   
   ; Create dropdown list to select distance value
   list = ['d = 1 (3x3 square)', 'd = 2 (5x5 square)', 'd = 3 (7x7 square)']
-  distance = WIDGET_PMENU(TLB, /AUTO_MANAGE, list=list, uvalue='d')
+  
+  W_Distance = WIDGET_PMENU(TLB, /AUTO_MANAGE, list=list, uvalue='d')
   
   ; Create the widget to let the user select file or memory output
-  FileOrMem = WIDGET_OUTFM(TLB, /AUTO_MANAGE, uvalue='fm')
+  W_FileOrMem = WIDGET_OUTFM(TLB, /AUTO_MANAGE, uvalue='fm')
+  
+  W_Classification = WIDGET_MENU(TLB, /AUTO_MANAGE, list=['Create classification'], uvalue='class')
   
   ; Start the automatic management of the window
   result = AUTO_WID_MNG(TLB) 
@@ -40,31 +43,8 @@ PRO NEWGETIS, event
   ; Call the function to create the Getis image
   GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, result.d + 1, base)
   
-  ; Create classification image for top 20% of data
-   
-  NumRows = (dims[2] - dims[1]) + 1
-  NumCols = (dims[4] - dims[3]) + 1
-  
-  ClassImage = INTARR(NumRows, NumCols)
-  Range = MAX(GetisImage) - MIN(GetisImage)
-  
-  MaxValue = MIN(GetisImage) + (0.7 * Range)
-  indices = WHERE(GetisImage GT MaxValue)
-  ClassImage[indices] = 1
-  MaxValue = MIN(GetisImage) + (0.8 * Range)
-  indices = WHERE(GetisImage GT MaxValue)
-  ClassImage[indices] = 2
-  MaxValue = MIN(GetisImage) + (0.9 * Range)
-  indices = WHERE(GetisImage GT MaxValue)
-  ClassImage[indices] = 3
-  
-  LookupArray = [ [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255] ]
-  
-  FileType = ENVI_FILE_TYPE("ENVI Classification")
-  
-  ENVI_ENTER_DATA, ClassImage, NUM_CLASSES=4, FILE_TYPE=FileType, LOOKUP=LookupArray, CLASS_NAMES=["Unclassified", '70%', '80%', '90%']
-  
-  
+  IF result.class EQ 1 THEN CreateClassificationImage, GetisImage, dims, result.fm.in_memory, result.fm.name, xstart, ystart, interleave
+
   IF result.fm.in_memory EQ 1 THEN BEGIN
     ; If the user wanted the result to go to memory then just output it there
     ENVI_ENTER_DATA, GetisImage
@@ -150,4 +130,55 @@ FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base
   ENVI_REPORT_INIT,base=report_base, /FINISH
   
   RETURN, OutputArray
+END
+
+PRO CreateClassificationImage, GetisImage, dims, in_memory, filename, xstart, ystart, interleave
+  ; Create classification image for top 20% of data
+   
+  NumRows = (dims[2] - dims[1]) + 1
+  NumCols = (dims[4] - dims[3]) + 1
+  
+  SizeInfo = Size(GetisImage, /DIMENSIONS)
+  NumBands = SizeInfo[2]
+  
+  FOR Bands = 0, NumBands - 1L DO BEGIN
+    ClassImage = INTARR(NumRows, NumCols)
+    
+    BandMax = MAX(GetisImage[*, *, Bands])
+    BandMin = MIN(GetisImage[*, *, Bands])
+    Range =  BandMax - BandMin
+    
+    ClassificationArray = [ 0.7, 0.8, 0.9 ]
+    
+    FOR i = 0, N_ELEMENTS(ClassificationArray) - 1L DO BEGIN
+      MaxValue = BandMin + (ClassificationArray[i] * Range)
+      indices = WHERE(GetisImage[*, *, Bands] GT MaxValue, Count)
+      IF Count GT 0 THEN ClassImage[indices] = i + 1
+    ENDFOR
+    
+    LookupArray = [ [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255] ]
+    
+    FileType = ENVI_FILE_TYPE("ENVI Classification")
+    
+    ClassNames = ["Unclassified", '70%', '80%', '90%']
+    
+    IF in_memory EQ 1 THEN BEGIN
+      ENVI_ENTER_DATA, ClassImage, NUM_CLASSES=4, FILE_TYPE=FileType, LOOKUP=LookupArray, CLASS_NAMES=ClassNames
+    ENDIF ELSE BEGIN
+      ; Then calculate the values needed to create the header file, and create it
+      NSamples = dims[2] - dims[1] + 1
+      NLines = dims[4] - dims[3] + 1
+      NBands = 1
+      CurrentFileName = filename + "_Classification_Band" + StrCompress(String(Bands + 1), /REMOVE_ALL)
+      OpenW, unit, CurrentFileName, /GET_LUN
+      WriteU, unit, ClassImage
+      FREE_LUN, unit
+      ENVI_SETUP_HEAD, FNAME=CurrentFileName, NS=NSamples, NL=NLines, NB=NBands, $
+        DATA_TYPE=2, offset=0, INTERLEAVE=interleave, $
+        XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
+        DESCRIP="Getis Image Classification", FILE_TYPE=FileType, $
+        LOOKUP=LookupArray, NUM_CLASSES=4, CLASS_NAMES=ClassNames, /OPEN, /WRITE
+    ENDELSE
+    
+  ENDFOR
 END
