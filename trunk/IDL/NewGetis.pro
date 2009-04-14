@@ -139,7 +139,8 @@ PRO CreateClassificationImage, GetisImage, dims, in_memory, filename, xstart, ys
   NumCols = (dims[4] - dims[3]) + 1
   
   SizeInfo = Size(GetisImage, /DIMENSIONS)
-  NumBands = SizeInfo[2]
+  SizeOfSize = Size(SizeInfo, /DIMENSIONS)
+  IF SizeOfSize EQ 3 THEN NumBands = SizeInfo[2] ELSE NumBands = 1
   
   FOR Bands = 0, NumBands - 1L DO BEGIN
     ClassImage = INTARR(NumRows, NumCols)
