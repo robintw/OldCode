@@ -1,3 +1,5 @@
+@Scale_Vector
+
 PRO NEWGETIS, event
   
   ; Use the ENVI dialog box to select a file
@@ -42,6 +44,13 @@ PRO NEWGETIS, event
   
   ; Call the function to create the Getis image
   GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, result.d + 1, base)
+  
+  ; Normalise the Getis image from 0 to 1
+  ;IF MIN(GetisImage) LT 0 THEN GetisImage = GetisImage + ABS(MIN(GetisImage))
+  
+  ;Range = Max(GetisImage) - Min(GetisImage)
+  
+  ;GetisImage = GetisImage * (1/Range)
   
   IF result.class EQ 1 THEN CreateClassificationImage, GetisImage, dims, result.fm.in_memory, result.fm.name, xstart, ystart, interleave
 
