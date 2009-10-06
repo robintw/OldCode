@@ -1,7 +1,6 @@
 @Scale_Vector
 
 PRO NEWGETIS, event
-  
   ; Use the ENVI dialog box to select a file
   ENVI_SELECT, fid=file,dims=dims,pos=pos
   
@@ -77,6 +76,41 @@ PRO NEWGETIS, event
  
 END
 
+PRO NEWGETIS_NOGUI, file, dims, pos
+  ; Create dropdown list to select distance value
+  ;list = ['d = 1 (3x3 square)', 'd = 2 (5x5 square)', 'd = 3 (7x7 square)']
+  
+  ; Get the details of the file, ready to write to the disk
+  ENVI_FILE_QUERY, file, fname=fname, data_type=data_type, xstart=xstart, $
+    ystart=ystart, INTERLEAVE=interleave
+    
+  ; Get the map info of the file so that we can output it to the new file
+  map_info = ENVI_GET_MAP_INFO(FID=file)
+  
+  output_file = fname + "_getis.bsq"
+  
+  ; Initialise the progress bar window
+  ENVI_REPORT_INIT, ['Input File: ' + fname, 'Output File: ' + output_file], title='Getis status', base=base, /INTERRUPT
+  
+  ; Call the function to create the Getis image - DISTANCE HARD CODED AS 1
+  GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, 1, base)
+  
+  ; If the output is to file then open the file, write the binary data
+  ; and close the file
+  OpenW, unit, output_file, /GET_LUN
+  WriteU, unit, GetisImage
+  FREE_LUN, unit
+    
+  ; Then calculate the values needed to create the header file, and create it
+  NSamples = dims[2] - dims[1] + 1
+  NLines = dims[4] - dims[3] + 1
+  NBands = N_ELEMENTS(pos)
+  ENVI_SETUP_HEAD, FNAME=output_file, NS=NSamples, NL=NLines, NB=NBands, $
+    DATA_TYPE=4, offset=0, INTERLEAVE=interleave, $
+    XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
+    DESCRIP="Getis Image Output", MAP_INFO=map_info, /OPEN, /WRITE 
+END
+
 ; Creates a Getis image given a FID, the dimensions of the file, a distance to use for the getis routine
 ; and a base window to send progress updates to
 FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base
@@ -116,7 +150,7 @@ FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base
     
     ; Create an image where each element is the sum of the elements within
     ; d around it
-    SummedImage = CONVOL(FLOAT(WholeBand), Kernel, /CENTER, /EDGE_ZERO)
+    SummedImage = CONVOL(FLOAT(WholeBand), Kernel, /CENTER, /EDGE_TRUNCATE)
     
     ; Create an image where each element is the result of the top fraction part
     ; of the getis formula
