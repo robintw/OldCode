@@ -11,4 +11,7 @@ PRO CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos
   print, abund_fid
   
   CREATE_ROI_CLASS_IMAGE, 0.2, abund_fid, r_dims, pos
+  
+  ; Do something like the following
+  roi_id = ROI_PERCENTILE_THRESHOLD(0.1, "test 0.1 bottom <0", 3, fid=fid, dims=dims, pos=pos, /bottom, /below_zero)
 END

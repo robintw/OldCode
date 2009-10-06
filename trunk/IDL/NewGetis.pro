@@ -76,7 +76,7 @@ PRO NEWGETIS, event
  
 END
 
-PRO NEWGETIS_NOGUI, file, dims, pos
+PRO NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
   ; Create dropdown list to select distance value
   ;list = ['d = 1 (3x3 square)', 'd = 2 (5x5 square)', 'd = 3 (7x7 square)']
   
@@ -93,7 +93,7 @@ PRO NEWGETIS_NOGUI, file, dims, pos
   ENVI_REPORT_INIT, ['Input File: ' + fname, 'Output File: ' + output_file], title='Getis status', base=base, /INTERRUPT
   
   ; Call the function to create the Getis image - DISTANCE HARD CODED AS 1
-  GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, 1, base)
+  GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, 1, base, m_fid, m_pos)
   
   ; If the output is to file then open the file, write the binary data
   ; and close the file
@@ -112,8 +112,8 @@ PRO NEWGETIS_NOGUI, file, dims, pos
 END
 
 ; Creates a Getis image given a FID, the dimensions of the file, a distance to use for the getis routine
-; and a base window to send progress updates to
-FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base
+; and a base window to send progress updates to as well as a fid and pos for the mask (if any)
+FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base, m_fid, m_pos
   NumRows = dims[2] - dims[1]
   NumCols = dims[4] - dims[3]
   
@@ -168,6 +168,15 @@ FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base
     ; if not then append it to the end of OutputArray
     IF (CurrPos EQ 0) THEN OutputArray = Getis ELSE OutputArray = [ [[OutputArray]], [[Getis]] ]
   ENDFOR
+  
+  if m_fid NE -1 THEN BEGIN
+    ENVI_FILE_QUERY, m_fid, dims=dims
+    MaskBand = ENVI_GET_DATA(fid=m_fid, dims=dims, pos=m_pos)
+    
+    OutputArray = MaskBand AND OutputArray
+  ENDIF
+  
+  
   
   ; Close the progress window
   ENVI_REPORT_INIT,base=report_base, /FINISH
