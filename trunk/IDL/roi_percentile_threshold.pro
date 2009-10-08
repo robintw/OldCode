@@ -1,11 +1,10 @@
-FUNCTION ROI_PERCENTILE_THRESHOLD, percentage, name, color, fid=fid, dims=dims, pos=pos, ensure_below_zero=ensure_below_zero, bottom=bottom
+FUNCTION ROI_PERCENTILE_THRESHOLD, percentage, name, color, fid=fid, dims=dims, pos=pos, ensure_above_zero=ensure_above_zero, ensure_below_zero=ensure_below_zero, bottom=bottom
   orig_image_data = ENVI_GET_DATA(fid=fid, dims=dims, pos=pos)
   
   if KEYWORD_SET(ensure_below_zero) THEN image_data = orig_image_data[WHERE(orig_image_data LT 0)] ELSE image_data = orig_image_data
+  if KEYWORD_SET(ensure_above_zero) THEN image_data = orig_image_data[WHERE(orig_image_data GT 0)] ELSE image_data = orig_image_data
   
   if KEYWORD_SET(bottom) THEN sorted_image_indices = SORT(image_data) ELSE sorted_image_indices = REVERSE(SORT(image_data)) 
-  
-  print, image_data[sorted_image_indices[0]]
   
   len = N_ELEMENTS(image_data)
   

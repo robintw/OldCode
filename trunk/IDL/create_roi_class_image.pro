@@ -1,4 +1,4 @@
-PRO CREATE_ROI_CLASS_IMAGE, percentage, fid, dims, pos
+PRO CREATE_SMACC_ROI_CLASS_IMAGE, percentage, fid, dims, pos
 
   ; Use the ENVI dialog box to select a file
   ;ENVI_SELECT, fid=fid,dims=dims,pos=pos
