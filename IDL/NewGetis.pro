@@ -76,7 +76,7 @@ PRO NEWGETIS, event
  
 END
 
-FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
+FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos, distance
   ; Create dropdown list to select distance value
   ;list = ['d = 1 (3x3 square)', 'd = 2 (5x5 square)', 'd = 3 (7x7 square)']
   
@@ -87,13 +87,13 @@ FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
   ; Get the map info of the file so that we can output it to the new file
   map_info = ENVI_GET_MAP_INFO(FID=file)
   
-  output_file = fname + "_getis.bsq"
+  output_file = fname + "_getis_distance_" + strcompress(string(distance)) + ".bsq"
   
   ; Initialise the progress bar window
   ENVI_REPORT_INIT, ['Input File: ' + fname, 'Output File: ' + output_file], title='Getis status', base=base, /INTERRUPT
   
   ; Call the function to create the Getis image - DISTANCE HARD CODED AS 1
-  GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, 1, base, m_fid, m_pos)
+  GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, distance, base, m_fid, m_pos)
   
   help, GetisImage
   
