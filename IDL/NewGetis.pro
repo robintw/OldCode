@@ -76,7 +76,7 @@ PRO NEWGETIS, event
  
 END
 
-PRO NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
+FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
   ; Create dropdown list to select distance value
   ;list = ['d = 1 (3x3 square)', 'd = 2 (5x5 square)', 'd = 3 (7x7 square)']
   
@@ -95,6 +95,8 @@ PRO NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
   ; Call the function to create the Getis image - DISTANCE HARD CODED AS 1
   GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, 1, base, m_fid, m_pos)
   
+  help, GetisImage
+  
   ; If the output is to file then open the file, write the binary data
   ; and close the file
   OpenW, unit, output_file, /GET_LUN
@@ -108,7 +110,11 @@ PRO NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos
   ENVI_SETUP_HEAD, FNAME=output_file, NS=NSamples, NL=NLines, NB=NBands, $
     DATA_TYPE=4, offset=0, INTERLEAVE=interleave, $
     XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
-    DESCRIP="Getis Image Output", MAP_INFO=map_info, /OPEN, /WRITE 
+    DESCRIP="Getis Image Output", MAP_INFO=map_info, /OPEN, /WRITE
+    
+  ENVI_OPEN_FILE, output_file, r_fid=fid
+  
+  return, fid
 END
 
 ; Creates a Getis image given a FID, the dimensions of the file, a distance to use for the getis routine
@@ -118,6 +124,8 @@ FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base, m_fid, m_po
   NumCols = dims[4] - dims[3]
   
   NumPos = N_ELEMENTS(pos)
+  
+  print, NumPos
   
   ; Let the progress bar know how many bands we're dealing with (denom. of fraction)
   ENVI_REPORT_INC, report_base, NumPos
@@ -170,12 +178,15 @@ FUNCTION CREATE_GETIS_IMAGE, file, dims, pos, distance, report_base, m_fid, m_po
   ENDFOR
   
   if m_fid NE -1 THEN BEGIN
+    ; Load the mask band
     ENVI_FILE_QUERY, m_fid, dims=dims
     MaskBand = ENVI_GET_DATA(fid=m_fid, dims=dims, pos=m_pos)
     
-    OutputArray = MaskBand AND OutputArray
-  ENDIF
-  
+    ;Apply the mask for each of the bands
+    FOR i=0, NumPos -1 DO BEGIN
+      OutputArray[*, *, i] = MaskBand AND OutputArray[*, *, i]
+    ENDFOR
+  endif
   
   
   ; Close the progress window
