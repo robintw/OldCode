@@ -1,10 +1,8 @@
-PRO CREATE_SMACC_ROI_CLASS_IMAGE, percentage, fid, dims, pos
-
-  ; Use the ENVI dialog box to select a file
-  ;ENVI_SELECT, fid=fid,dims=dims,pos=pos
-  
+PRO CREATE_SMACC_ROI_CLASS_IMAGE, percentage, fid, dims, pos  
   ; If the dialog box was cancelled then stop the procedure
   IF fid[0] EQ -1 THEN RETURN
+  
+  ENVI_FILE_QUERY, fid, fname=fname
   
   ; Create an array to hold the roi_ids returned by the Percentile Threshold function
   roi_ids=lonarr(n_elements(pos))
@@ -22,5 +20,5 @@ PRO CREATE_SMACC_ROI_CLASS_IMAGE, percentage, fid, dims, pos
   ENDFOR
   
   ; Convert the ROIs to a classification image where every pixel that is in any of the ROIs gets given a value of 1
-  ENVI_DOIT, 'ENVI_ROI_TO_IMAGE_DOIT', class_values=replicate(long(1), N_ELEMENTS(pos)), FID=fid, ROI_IDS=roi_ids, /IN_MEMORY
+  ENVI_DOIT, 'ENVI_ROI_TO_IMAGE_DOIT', class_values=replicate(long(1), N_ELEMENTS(pos)), FID=fid, ROI_IDS=roi_ids, out_name=fname+"_SMACC_ClassImage.bsq"
 END

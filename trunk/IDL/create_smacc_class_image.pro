@@ -1,4 +1,4 @@
-PRO CREATE_SMACC_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos
+PRO CREATE_SMACC_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage
   ; Run this first
   ; ENVI_SELECT, fid=fid,dims=dims,pos=pos, /mask, m_fid=m_fid, m_pos=m_pos
   
@@ -10,5 +10,5 @@ PRO CREATE_SMACC_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos
   
   print, abund_fid
   
-  CREATE_SMACC_ROI_CLASS_IMAGE, 0.2, abund_fid, r_dims, pos
+  CREATE_SMACC_ROI_CLASS_IMAGE, percentage, abund_fid, r_dims, pos
 END
