@@ -1,6 +1,6 @@
 @NewGetis
 
-PRO CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos
+PRO CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage, distance
   ; Run this first
   ; ENVI_SELECT, fid=fid,dims=dims,pos=pos, /mask, m_fid=m_fid, m_pos=m_pos
   
