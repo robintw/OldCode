@@ -1,14 +1,10 @@
 @NewGetis
 
-PRO CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage, distance
+FUNCTION CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage, distance
   ; Run this first
   ; ENVI_SELECT, fid=fid,dims=dims,pos=pos, /mask, m_fid=m_fid, m_pos=m_pos
   
   ENVI_FILE_QUERY, fid, fname=fname
-  
-  percentage = 0.5
-  
-  distance = 2
   
   getis_fid = NEWGETIS_NOGUI(fid, dims, pos, m_fid, m_pos, distance)
   
@@ -65,6 +61,6 @@ PRO CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage, distance
     out_dt=1, out_name=fname+"_GetisClassStacked.bsq", out_ps=pixel_size, $
     out_proj=projection, r_fid=r_fid
 
-  
+  return, r_fid
   
 END
