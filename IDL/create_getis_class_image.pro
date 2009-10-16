@@ -1,6 +1,6 @@
 @NewGetis
 
-FUNCTION CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage, distance
+FUNCTION CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, top_percentage, bottom_percentage, distance
   ; Run this first
   ; ENVI_SELECT, fid=fid,dims=dims,pos=pos, /mask, m_fid=m_fid, m_pos=m_pos
   
@@ -12,19 +12,26 @@ FUNCTION CREATE_GETIS_CLASS_IMAGE, fid, dims, pos, m_fid, m_pos, percentage, dis
   
   print, pos
   
+  ENVI_FILE_QUERY, getis_fid, nb=nb
+  
+  help, nb
+  
+  pos = lindgen(nb)
+  
   top_roi_ids = lonarr(N_ELEMENTS(pos))
   bottom_roi_ids = lonarr(N_ELEMENTS(pos))
   
   FOR i=0, N_ELEMENTS(pos)-1 DO BEGIN
     print, "Doing band " + string(i)
     ; Get the high Getis values (bright uniform areas)    
-    top_roi = ROI_PERCENTILE_THRESHOLD(percentage, "Band " + strcompress(string(pos[i])) + " top", color, fid=getis_fid, dims=dims, pos=pos[i], /ensure_above_zero)
+    top_roi = ROI_PERCENTILE_THRESHOLD(top_percentage, "Band " + strcompress(string(pos[i])) + " top", color, fid=getis_fid, dims=dims, pos=pos[i], /ensure_above_zero)
+    ;top_roi = ROI_PERCENTILE_THRESHOLD(percentage, "Band " + strcompress(string(pos[i])) + " top", color, fid=getis_fid, dims=dims, pos=pos[i])
     color = color + 1
     
     top_roi_ids[i] = top_roi
     
     ; Get the low Getis values (dark uniform areas)
-    bottom_roi = ROI_PERCENTILE_THRESHOLD(percentage, "Band " + strcompress(string(pos[i])) + " bottom", color, fid=getis_fid, dims=dims, pos=pos[i], /bottom, /ensure_below_zero)
+    bottom_roi = ROI_PERCENTILE_THRESHOLD(bottom_percentage, "Band " + strcompress(string(pos[i])) + " bottom", color, fid=getis_fid, dims=dims, pos=pos[i], /bottom, /ensure_below_zero)
     color = color + 1
     
     bottom_roi_ids = bottom_roi

@@ -14,10 +14,10 @@ FUNCTION ROI_PERCENTILE_THRESHOLD, percentage, name, color, fid=fid, dims=dims, 
   
   if KEYWORD_SET(bottom) THEN BEGIN
     ENVI_DOIT, 'ROI_THRESH_DOIT', dims=dims, fid=fid, pos=pos, min_thresh=MIN(orig_image_data), $
-    max_thresh=threshold, ROI_ID=roi_id, ROI_NAME=name, ROI_COLOR=color, /NO_QUERY
+      max_thresh=threshold, ROI_ID=roi_id, ROI_NAME=name, ROI_COLOR=color, /NO_QUERY
   ENDIF ELSE BEGIN
-  ENVI_DOIT, 'ROI_THRESH_DOIT', dims=dims, fid=fid, pos=pos, $
-    min_thresh=threshold, max_thresh=MAX(orig_image_data), ROI_ID=roi_id, ROI_NAME=name, ROI_COLOR=color, /NO_QUERY
+    ENVI_DOIT, 'ROI_THRESH_DOIT', dims=dims, fid=fid, pos=pos, $
+      min_thresh=threshold, max_thresh=MAX(orig_image_data), ROI_ID=roi_id, ROI_NAME=name, ROI_COLOR=color, /NO_QUERY
   ENDELSE
   
   return, roi_id 
