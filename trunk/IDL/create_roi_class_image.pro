@@ -7,11 +7,15 @@ FUNCTION CREATE_SMACC_ROI_CLASS_IMAGE, percentage, fid, dims, pos
   ; Create an array to hold the roi_ids returned by the Percentile Threshold function
   roi_ids=lonarr(n_elements(pos))
   
+  help, pos
+  
   ; For each band...
   FOR i=0, N_ELEMENTS(pos)-1 DO BEGIN
     ; Create a name for the ROI
     name = "Band " + STRCOMPRESS(STRING(i)) + " " + STRCOMPRESS(STRING(percentage, FORMAT="(f5.3)")) + "%"
-  
+    
+    print, name
+    
     ;Create the ROI using a percentile threshold
     roi_id = ROI_PERCENTILE_THRESHOLD(percentage, name, 2+i, fid=fid, dims=dims, pos=pos[i])
     

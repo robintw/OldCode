@@ -1,6 +1,9 @@
-PRO CREATE_GETIS_AND_SMACC_FILES, smacc_percentage, getis_percentage, getis_distance, out_file
+PRO CREATE_GETIS_AND_SMACC_FILES, smacc_percentage, getis_top_percentage, getis_bottom_percentage, getis_distance, out_file
   ; Open a dialog box to allow the input IKONOS and DEM file to be selected - along with a mask if needed
   ENVI_SELECT, fid=fid, dims=dims, pos=pos, /mask, m_fid=m_fid, m_pos=m_pos, title="Select the image, excluding the DEM band"
+  
+  print, "After Select, POS = "
+  print, pos
   
   ; Get the DEM band
   ENVI_SELECT, fid=dem_fid, dims=dem_dims, pos=dem_pos, title="Select the DEM band", /band_only
@@ -11,10 +14,10 @@ PRO CREATE_GETIS_AND_SMACC_FILES, smacc_percentage, getis_percentage, getis_dist
   ; Create the SMACC classification image
   smacc_class_fid = CREATE_SMACC_CLASS_IMAGE(fid, dims, pos, m_fid, m_pos, smacc_percentage)
   
-  getis_class_fid = CREATE_GETIS_CLASS_IMAGE(fid, dims, pos, m_fid, m_pos, getis_percentage, getis_distance)
+  print, "After create SMACC, POS = "
+  print, pos
   
-  help, dem_dims
-  print, dem_dims
+  getis_class_fid = CREATE_GETIS_CLASS_IMAGE(fid, dims, pos, m_fid, m_pos, getis_top_percentage, getis_bottom_percentage, getis_distance)
   
   slope_aspect_fid = CREATE_SLOPE_ASPECT_IMAGES(dem_fid, dem_pos)
   
