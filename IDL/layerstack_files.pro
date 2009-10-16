@@ -26,6 +26,6 @@ PRO LAYERSTACK_FILES, input_fids, out_name
   projection = ENVI_GET_PROJECTION(fid=input_fids[0], pixel_size=pixel_size)
   
   ENVI_DOIT, 'ENVI_LAYER_STACKING_DOIT', fid=output_fids, pos=output_pos, dims=output_dims, $
-    out_dt=2, out_name=out_name, out_ps=pixel_size, $
+    out_dt=4, out_name=out_name, out_ps=pixel_size, $
     out_proj=projection, r_fid=r_fid
 END
