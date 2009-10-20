@@ -17,7 +17,7 @@ FUNCTION CREATE_SMACC_ROI_CLASS_IMAGE, percentage, fid, dims, pos
     print, name
     
     ;Create the ROI using a percentile threshold
-    roi_id = ROI_PERCENTILE_THRESHOLD(percentage, name, 2+i, fid=fid, dims=dims, pos=pos[i])
+    roi_id = ROI_PERCENTILE_THRESHOLD(percentage, name, 2+i, fid=fid, dims=dims, pos=pos[i], /ensure_above_zero)
     
     ; Put the ROI ID into the array
     roi_ids[i] = roi_id
