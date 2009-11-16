@@ -1,6 +1,10 @@
-PRO CREATE_GETIS_AND_SMACC_FILES, smacc_percentage, getis_top_percentage, getis_bottom_percentage, getis_distance, out_file
+; Run with CREATE_GETIS_AND_SMACC_FILES, 0.3, 0.3, 0.3, 1, "F:\Dissertation\Data\Final Processing Outputs\Ki-Default.bsq"
+PRO CREATE_FILES_FOR_ECOG, smacc_percentage, getis_top_percentage, getis_bottom_percentage, getis_distance, out_file
   ; Open a dialog box to allow the input IKONOS and DEM file to be selected - along with a mask if needed
   ENVI_SELECT, fid=fid, dims=dims, pos=pos, /mask, m_fid=m_fid, m_pos=m_pos, title="Select the image, excluding the DEM band"
+  
+  ; If the dialog was cancelled then just exit
+  IF fid EQ -1 THEN RETURN
   
   print, "After Select, POS = "
   print, pos
