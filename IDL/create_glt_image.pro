@@ -1,3 +1,5 @@
+; Creates a GLT file ready to be geometrically processed by AZGCORR, and then used with CRESCA in ATCOR
+; using the 'Create from GLT/MAP' option.
 ; Call this function with the size of the image you want in x and y, and a base filename for the output
 ; images in base_filename
 PRO CREATE_GLT_IMAGE, x, y, base_filename, reverse_cols=reverse_cols, reverse_rows=reverse_rows
@@ -22,6 +24,7 @@ PRO CREATE_GLT_IMAGE, x, y, base_filename, reverse_cols=reverse_cols, reverse_ro
   
   ;print, row_indices_image
   
+  ; Write the ENVI format files
   ENVI_WRITE_ENVI_FILE, col_indices_image, data_type=2, interleave=0, nb=1, nl=y, ns=x, offset=0, out_name=base_filename+"_ColIndices.bsq"
   ENVI_WRITE_ENVI_FILE, row_indices_image, data_type=2, interleave=0, nb=1, nl=y, ns=x, offset=0, out_name=base_filename+"_RowIndices.bsq"
 END
