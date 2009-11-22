@@ -16,8 +16,6 @@ PRO CV, event
   ; Create the widget to let the user select file or memory output
   W_FileOrMem = WIDGET_OUTFM(TLB, /AUTO_MANAGE, uvalue='fm')
   
-  W_Classification = WIDGET_MENU(TLB, /AUTO_MANAGE, list=['Create classification'], uvalue='class')
-  
   ; Start the automatic management of the window
   result = AUTO_WID_MNG(TLB) 
   
@@ -41,8 +39,6 @@ PRO CV, event
   
   ; Call the function to create the Getis image
   CVImage = CREATE_CV_IMAGE(file, dims, pos, result.d + 1, base)
-  
-  IF result.class EQ 1 THEN Create_CV_Classification_Image, CVImage, dims, result.fm.in_memory, result.fm.name, xstart, ystart, interleave
 
   IF result.fm.in_memory EQ 1 THEN BEGIN
     ; If the user wanted the result to go to memory then just output it there
@@ -61,7 +57,7 @@ PRO CV, event
     ENVI_SETUP_HEAD, FNAME=result.fm.name, NS=NSamples, NL=NLines, NB=NBands, $
       DATA_TYPE=4, offset=0, INTERLEAVE=interleave, $
       XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
-      DESCRIP="Getis Image Output", MAP_INFO=map_info, /OPEN, /WRITE
+      DESCRIP="CV Image Output", MAP_INFO=map_info, /OPEN, /WRITE
   ENDELSE
 END
 
@@ -108,54 +104,4 @@ FUNCTION CREATE_CV_IMAGE, file, dims, pos, distance, report_base
   ENVI_REPORT_INIT,base=report_base, /FINISH
   
   RETURN, OutputArray
-END
-
-PRO Create_CV_Classification_Image, CVImage, dims, in_memory, filename, xstart, ystart, interleave
-  NumRows = (dims[2] - dims[1]) + 1
-  NumCols = (dims[4] - dims[3]) + 1
-  
-  SizeInfo = Size(CVImage, /DIMENSIONS)
-  SizeOfSize = Size(SizeInfo, /DIMENSIONS)
-  IF SizeOfSize EQ 3 THEN NumBands = SizeInfo[2] ELSE NumBands = 1
-  
-  FOR Bands = 0, NumBands - 1L DO BEGIN
-    ClassImage = INTARR(NumRows, NumCols)
-    
-    BandMax = MAX(CVImage[*, *, Bands])
-    BandMin = MIN(CVImage[*, *, Bands])
-    Range =  BandMax - BandMin
-    
-    ClassificationArray = [ 0.03, 0.02, 0.01 ]
-    
-    FOR i = 0, N_ELEMENTS(ClassificationArray) - 1L DO BEGIN
-      MaxValue = BandMin + (ClassificationArray[i] * Range)
-      indices = WHERE(CVImage[*, *, Bands] LT MaxValue, Count)
-      IF Count GT 0 THEN ClassImage[indices] = i + 1
-    ENDFOR
-    
-    LookupArray = [ [255, 255, 255], [255, 0, 0], [0, 255, 0], [0, 0, 255] ]
-    
-    FileType = ENVI_FILE_TYPE("ENVI Classification")
-    
-    ClassNames = ["Unclassified", '3%', '2%', '1%']
-    
-    IF in_memory EQ 1 THEN BEGIN
-      ENVI_ENTER_DATA, ClassImage, NUM_CLASSES=4, FILE_TYPE=FileType, LOOKUP=LookupArray, CLASS_NAMES=ClassNames
-    ENDIF ELSE BEGIN
-      ; Then calculate the values needed to create the header file, and create it
-      NSamples = dims[2] - dims[1] + 1
-      NLines = dims[4] - dims[3] + 1
-      NBands = 1
-      CurrentFileName = filename + "_Classification_Band" + StrCompress(String(Bands + 1), /REMOVE_ALL)
-      OpenW, unit, CurrentFileName, /GET_LUN
-      WriteU, unit, ClassImage
-      FREE_LUN, unit
-      ENVI_SETUP_HEAD, FNAME=CurrentFileName, NS=NSamples, NL=NLines, NB=NBands, $
-        DATA_TYPE=2, offset=0, INTERLEAVE=interleave, $
-        XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
-        DESCRIP="Getis Image Classification", FILE_TYPE=FileType, $
-        LOOKUP=LookupArray, NUM_CLASSES=4, CLASS_NAMES=ClassNames, /OPEN, /WRITE
-    ENDELSE
-    
-  ENDFOR
 END
