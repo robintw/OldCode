@@ -1,3 +1,48 @@
+FUNCTION CREATE_CV_IMAGE, file, dims, pos, distance, report_base
+  NumRows = dims[2] - dims[1]
+  NumCols = dims[4] - dims[3]
+  
+  NumPos = N_ELEMENTS(pos)
+  
+  ; Let the progress bar know how many bands we're dealing with (denom. of fraction)
+  ENVI_REPORT_INC, report_base, NumPos
+  
+  FOR CurrPos = 0, NumPos - 1 DO BEGIN
+    ; Send an update to the progress window telling it to let us know if cancel has been pressed
+    ENVI_REPORT_STAT, report_base, CurrPos, NumPos
+    
+    ; Get the data for the current band
+    WholeBand = ENVI_GET_DATA(fid=file, dims=dims, pos=pos[CurrPos])
+    
+    Dim = (distance * 2) + 1
+    
+    N = Dim^2
+    
+    AverageImage = SMOOTH(Double(WholeBand), Dim, /EDGE_TRUNCATE)
+    
+    SquareImage = Double(WholeBand)^2
+    
+    AverageSquareImage = SMOOTH(Double(SquareImage), Dim, /EDGE_TRUNCATE)
+    
+    CVOutput = temporary(AverageSquareImage) - (AverageImage^2)
+    
+    VarianceImage = CVOutput * (double(N)/(N-1))
+    
+    StDevImage = sqrt(VarianceImage)
+    
+    CVOutput = double(StDevImage) / AverageImage
+    
+    ; If it's the first time then copy the CV result to OutputArray,
+    ; if not then append it to the end of OutputArray
+    IF (CurrPos EQ 0) THEN OutputArray = CVOutput ELSE OutputArray = [ [[OutputArray]], [[CVOutput]] ]
+  ENDFOR
+  
+  ; Close the progress window
+  ENVI_REPORT_INIT,base=report_base, /FINISH
+  
+  RETURN, OutputArray
+END
+
 PRO CV, event
   ; Use the ENVI dialog box to select a file
   ENVI_SELECT, fid=file,dims=dims,pos=pos
@@ -59,49 +104,4 @@ PRO CV, event
       XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
       DESCRIP="CV Image Output", MAP_INFO=map_info, /OPEN, /WRITE
   ENDELSE
-END
-
-FUNCTION CREATE_CV_IMAGE, file, dims, pos, distance, report_base
-  NumRows = dims[2] - dims[1]
-  NumCols = dims[4] - dims[3]
-  
-  NumPos = N_ELEMENTS(pos)
-  
-  ; Let the progress bar know how many bands we're dealing with (denom. of fraction)
-  ENVI_REPORT_INC, report_base, NumPos
-  
-  FOR CurrPos = 0, NumPos - 1 DO BEGIN
-    ; Send an update to the progress window telling it to let us know if cancel has been pressed
-    ENVI_REPORT_STAT, report_base, CurrPos, NumPos
-    
-    ; Get the data for the current band
-    WholeBand = ENVI_GET_DATA(fid=file, dims=dims, pos=pos[CurrPos])
-    
-    Dim = (distance * 2) + 1
-    
-    N = Dim^2
-    
-    AverageImage = SMOOTH(Double(WholeBand), Dim, /EDGE_TRUNCATE)
-    
-    SquareImage = Double(WholeBand)^2
-    
-    AverageSquareImage = SMOOTH(Double(SquareImage), Dim, /EDGE_TRUNCATE)
-    
-    CVOutput = temporary(AverageSquareImage) - (AverageImage^2)
-    
-    VarianceImage = CVOutput * (double(N)/(N-1))
-    
-    StDevImage = sqrt(VarianceImage)
-    
-    CVOutput = double(StDevImage) / AverageImage
-    
-    ; If it's the first time then copy the CV result to OutputArray,
-    ; if not then append it to the end of OutputArray
-    IF (CurrPos EQ 0) THEN OutputArray = CVOutput ELSE OutputArray = [ [[OutputArray]], [[CVOutput]] ]
-  ENDFOR
-  
-  ; Close the progress window
-  ENVI_REPORT_INIT,base=report_base, /FINISH
-  
-  RETURN, OutputArray
 END
