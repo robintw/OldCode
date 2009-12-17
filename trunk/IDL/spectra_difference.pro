@@ -14,16 +14,16 @@ PRO SPECTRA_DIFFERENCE, abs=abs
   ; If the cancel button was pressed then exit
   IF result.accept EQ 0 THEN RETURN
   
-  envi_file_query, A_fid, spec_names=A_spec_names, ns=A_ns, nl=A_nl, file_type=A_file_type, wl=A_wavelengths
+  envi_file_query, A_fid, fname=A_fname, spec_names=A_spec_names, ns=A_ns, nl=A_nl, file_type=A_file_type, wl=A_wavelengths
   A_spectra = envi_get_data(fid=A_fid, pos=0, dims=[-1,0,A_ns-1, 0, A_nl-1])
   
-  envi_file_query, B_fid, spec_names=B_spec_names, ns=B_ns, nl=B_nl, file_type=B_file_type, wl=B_wavelengths
+  envi_file_query, B_fid, fname=B_fname, spec_names=B_spec_names, ns=B_ns, nl=B_nl, file_type=B_file_type, wl=B_wavelengths
   B_spectra = envi_get_data(fid=B_fid, pos=0, dims=[-1,0,B_ns-1, 0, B_nl-1])
   
-  Diff_spectra = (A_spectra / B_spectra) * 100
+  Diff_spectra = (ABS(A_spectra - B_spectra)/A_spectra) * 100
   
-  IF KEYWORD_SET("ABS") THEN Diff_spectra = ABS(Diff_spectra - 100)
-  
+  print, A_fname
+  print, B_fname
   print, A_wavelengths
   print, Diff_spectra
   
