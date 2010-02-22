@@ -9,7 +9,7 @@ PRO ADD_ZEROES_BAND
     if N_ELEMENTS(WholeImage) EQ 0 THEN WholeImage = band ELSE WholeImage = [ [[WholeImage]], [[band]] ]
   ENDFOR
   
-  Zeroes = fltarr(nl, ns)
+  Zeroes = fltarr(ns, nl)
   
   ENVI_ENTER_DATA, [ [[WholeImage]], [[Zeroes]] ]
 END
