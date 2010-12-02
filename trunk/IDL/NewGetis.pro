@@ -66,10 +66,11 @@ PRO NEWGETIS, event
 END
 
 FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos, distance
+  print, file
   ; Get the details of the file, ready to write to the disk
   ENVI_FILE_QUERY, file, fname=fname, data_type=data_type, xstart=xstart, $
     ystart=ystart, INTERLEAVE=interleave
-    
+  
   ; Get the map info of the file so that we can output it to the new file
   map_info = ENVI_GET_MAP_INFO(FID=file)
   
@@ -80,6 +81,8 @@ FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos, distance
   
   ; Call the function to create the Getis image - DISTANCE HARD CODED AS 1
   GetisImage = CREATE_GETIS_IMAGE(file, dims, pos, distance, base, m_fid, m_pos)
+  
+  ;ENVI_ENTER_DATA, GetisImage
   
   help, GetisImage
   
@@ -94,7 +97,7 @@ FUNCTION NEWGETIS_NOGUI, file, dims, pos, m_fid, m_pos, distance
   NLines = dims[4] - dims[3] + 1
   NBands = N_ELEMENTS(pos)
   ENVI_SETUP_HEAD, FNAME=output_file, NS=NSamples, NL=NLines, NB=NBands, $
-    DATA_TYPE=4, offset=0, INTERLEAVE=interleave, $
+    DATA_TYPE=4, offset=0, INTERLEAVE=0, $
     XSTART=xstart+dims[1], YSTART=ystart+dims[3], $
     DESCRIP="Getis Image Output", MAP_INFO=map_info, /OPEN, /WRITE
     
