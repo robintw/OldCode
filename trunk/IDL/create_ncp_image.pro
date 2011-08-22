@@ -13,6 +13,8 @@ if m_fid ne -1 then mask = envi_get_data(fid=m_fid,dims=dims1,pos=0) $
 
 ; Generate the NCP image
 chi_sqr = envi_get_data(fid=fid,dims=dims,pos=pos)
+tvscl, chi_sqr
+ENVI_ENTER_DATA, chisqr_pdf(chi_sqr,nb-1)
 ncp = 1.0 - chisqr_pdf(chi_sqr,nb-1)
 
 ; Apply the mask
