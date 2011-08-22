@@ -69,14 +69,19 @@ FUNCTION PROCESS_GETIS_BAND, getis, getis_percentage_thresh
   scaled = 1 - scaled
   getis[to_scale_indices] = scaled
   
+  print, "Inside GETIS PROCESS", MIN(getis), MAX(getis)
+  
   return, getis
 END
 
-PRO CREATE_FITNESS_IMAGE
-  getis_coef = 0.3
-  smacc_coef = 0.5
-  ncp_coef = 0.2
-  getis_percentage_thresh = 5
+FUNCTION SIMPLE_SCALE, array
+  res = array - MIN(array)
+  res = res * (1.0 / MAX(res))
+  
+  return, res
+END
+
+FUNCTION CREATE_FITNESS_IMAGE, getis_coef, smacc_coef, ncp_coef, getis_percentage_thresh
   
   ENVI_SELECT, fid=getis_fid, dims=getis_dims, pos=getis_pos, title="Select Getis image"
     
@@ -91,8 +96,11 @@ PRO CREATE_FITNESS_IMAGE
   smacc = PROCESS_SMACC(smacc_fid, smacc_dims, smacc_pos)
   
   ; It's easy to scale SMACC and the NCP as they are both given as fractions anyway
-  new_smacc = smacc_coef * smacc
-  new_ncp = ncp_coef * ncp
+  new_smacc = smacc_coef * SIMPLE_SCALE(smacc)
+  new_ncp = ncp_coef * SIMPLE_SCALE(ncp)
+  
+  print, "SMACC", smacc_coef, MIN(new_smacc), MAX(new_smacc)
+  print, "NCP", ncp_coef, MIN(new_ncp), MAX(new_ncp)
   
   getis_band_scale = 1 / FLOAT(N_ELEMENTS(getis_pos))
   
@@ -104,8 +112,19 @@ PRO CREATE_FITNESS_IMAGE
     IF N_ELEMENTS(new_getis) EQ 0 THEN new_getis = getis_band_scale * processed ELSE new_getis = new_getis + (getis_band_scale * processed)
   ENDFOR
   
-  ; Calculate overall fitness image
+  ; Do the final scaling of Getis
+  new_getis = getis_coef * SIMPLE_SCALE(new_getis)
+  
+  print, "Getis", getis_coef, MIN(new_getis), MAX(new_getis)
+  help, new_getis
+  
+  ; Calculate overall fitness image - which should be almost exactly 0-1 (excluding float errors)
   fitness = new_getis + new_smacc + new_ncp
   
-  ENVI_ENTER_DATA, fitness
+  ; However, just to make sure, we'll do a final simple scale
+  fitness = SIMPLE_SCALE(fitness)
+  
+  print, "Fitness", MIN(fitness), MAX(fitness)
+  
+  return, fitness
 END
